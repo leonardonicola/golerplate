@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16.4
+    container_name: golerplate
+    ports:
+      - "5432:${DB_PORT}"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+        - db
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pg-admin
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 123
+    depends_on:
+      - postgres
+    networks:
+        - db
+networks:
+  db:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: db_net
