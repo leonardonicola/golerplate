@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leonardonicola/golerplate/internal/domain/service"
 	"github.com/leonardonicola/golerplate/internal/dto"
-	"github.com/leonardonicola/golerplate/pkg/constants"
 	"github.com/leonardonicola/golerplate/pkg/util"
 )
 
@@ -50,14 +49,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		h.log.Printf("USER SERVICE: %s", err.Error())
 
-		// Default
-		errMsg := "Invalid credentials"
-
-		if err.Error() == constants.ErrMsgUserNotFound {
-			errMsg = "Email provided doesn't have an account linked to it"
-		}
-
-		c.JSON(http.StatusUnauthorized, gin.H{"message": errMsg})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
