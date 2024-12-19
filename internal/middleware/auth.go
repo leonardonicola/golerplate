@@ -14,7 +14,7 @@ import (
 )
 
 type JWTAuthMiddleware struct {
-	secret string
+	accessSecret string
 }
 
 var (
@@ -25,7 +25,7 @@ var (
 
 func NewJWTAuthMiddleware(secret string) *JWTAuthMiddleware {
 	return &JWTAuthMiddleware{
-		secret: secret,
+		accessSecret: secret,
 	}
 }
 
@@ -77,7 +77,7 @@ func (m *JWTAuthMiddleware) validateToken(tokenString string) (*service.Claims, 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Method)
 		}
-		return []byte(m.secret), nil
+		return []byte(m.accessSecret), nil
 	})
 
 	if err != nil {
