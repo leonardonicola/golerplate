@@ -2,7 +2,9 @@ package util
 
 import "golang.org/x/crypto/bcrypt"
 
-const bcryptSalt = 13
+// The higher the salt, the more it takes to hash
+// e.g: From 50ms (10) to 400ms (13)
+const bcryptSalt = 10
 
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptSalt)
