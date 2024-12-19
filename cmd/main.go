@@ -30,6 +30,12 @@ func main() {
 	}
 	defer db.Close()
 
+	shutdown, err := config.InitOTelSDK()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer shutdown()
+
 	router := config.NewRouter(db.Pool)
 
 	srv := &http.Server{

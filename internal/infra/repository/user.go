@@ -9,6 +9,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/leonardonicola/golerplate/internal/domain/entity"
 	"github.com/leonardonicola/golerplate/pkg/constants"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type UserRepository interface {
@@ -19,16 +23,22 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-	db *pgxpool.Pool
+	db     *pgxpool.Pool
+	tracer trace.Tracer
 }
 
 func NewUserRepository(db *pgxpool.Pool) UserRepository {
 	return &userRepository{
-		db: db,
+		db:     db,
+		tracer: otel.Tracer(constants.TRACER_NAME),
 	}
 }
 
 func (r *userRepository) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
+	ctx, span := r.tracer.Start(ctx, "Query", trace.WithAttributes(semconv.DBSystemPostgreSQL, attribute.String("db.table", "users"),
+		attribute.String("db.operation", "INSERT")))
+	defer span.End()
+
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return nil, err

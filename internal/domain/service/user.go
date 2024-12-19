@@ -9,6 +9,10 @@ import (
 	"github.com/leonardonicola/golerplate/internal/infra/repository"
 	"github.com/leonardonicola/golerplate/pkg/constants"
 	"github.com/leonardonicola/golerplate/pkg/util"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
 type UserService interface {
@@ -20,23 +24,28 @@ type UserService interface {
 }
 
 type userService struct {
-	repo repository.UserRepository
+	repo   repository.UserRepository
+	tracer oteltrace.Tracer
 }
 
 func NewUserService(r repository.UserRepository) *userService {
 	return &userService{
-		repo: r,
+		repo:   r,
+		tracer: otel.Tracer(constants.TRACER_NAME),
 	}
 }
 
 func (s *userService) Create(ctx context.Context, dto dto.RegisterUserDTO) (*entity.User, error) {
+	ctx, span := s.tracer.Start(ctx, "CreateUser", oteltrace.WithAttributes(attribute.String("email", dto.Email)))
+	defer span.End()
 
+	ctx, hashSpan := s.tracer.Start(ctx, "HashPassword")
 	hashedPw, err := util.HashPassword(dto.Password)
-
+	hashSpan.End()
 	if err != nil {
 		return nil, err
 	}
-
+	ctx, entitySpan := s.tracer.Start(ctx, "CreateEntity")
 	user, err := entity.NewUser(
 		dto.FullName,
 		dto.Email,
@@ -44,6 +53,7 @@ func (s *userService) Create(ctx context.Context, dto dto.RegisterUserDTO) (*ent
 		hashedPw,
 		uint8(dto.Age),
 	)
+	entitySpan.End()
 
 	if err != nil {
 		return nil, err

@@ -20,3 +20,5 @@ const (
 )
 
 const PORT = ":3000"
+
+const TRACER_NAME = "golerplate"

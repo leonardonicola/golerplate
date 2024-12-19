@@ -22,6 +22,7 @@ func NewRouter(pool *pgxpool.Pool) *gin.Engine {
 
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
+	r.Use(middleware.TracingMiddleware())
 
 	// User.
 	userRepo := repository.NewUserRepository(pool)
