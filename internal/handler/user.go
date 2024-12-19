@@ -35,6 +35,8 @@ func NewUserHandler(us service.UserService) *UserHandler {
 //	@Failure		500		{object}	dto.ErrorResponseDTO	"Internal server error"
 //	@Router			/register [post]
 func (h *UserHandler) Register(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	var req dto.RegisterUserDTO
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -43,7 +45,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.Create(c, req)
+	user, err := h.userService.Create(ctx, req)
 
 	if err != nil {
 		h.log.Print(err)

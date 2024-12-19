@@ -45,7 +45,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.Authenticate(c, req.Email, req.Password)
+	user, err := h.userService.Authenticate(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		h.log.Printf("USER SERVICE: %s", err.Error())
 
