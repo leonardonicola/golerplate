@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -30,10 +31,16 @@ func NewRouter(pool *pgxpool.Pool) *gin.Engine {
 	userHandler := handler.NewUserHandler(userService)
 
 	// Auth.
-	authService := service.NewAuthService(os.Getenv("ACCESS_SECRET"), os.Getenv("REFRESH_SECRET"), time.Hour, 2*time.Hour)
+	accessSecret, accessExists := os.LookupEnv("ACCESS_SECRET")
+	refreshSecret, refreshExists := os.LookupEnv("REFRESH_SECRET")
+	if !accessExists || !refreshExists {
+		log.Panic("SECRETS variables are not defined correctly.")
+	}
+
+	authService := service.NewAuthService(accessSecret, refreshSecret, time.Hour, 2*time.Hour)
 	authHandler := handler.NewAuthHandler(userService, authService)
 
-	jwtMiddleware := middleware.NewJWTAuthMiddleware(os.Getenv("JWT_SECRET"))
+	jwtMiddleware := middleware.NewJWTAuthMiddleware(accessSecret)
 
 	docs.SwaggerInfo.BasePath = "/api"
 	public := r.Group("/api")

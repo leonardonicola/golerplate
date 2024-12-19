@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/leonardonicola/golerplate/pkg/constants"
@@ -46,8 +47,13 @@ func newPropagator() propagation.TextMapPropagator {
 }
 
 func newTracer() (*trace.TracerProvider, error) {
+	jaegerUrl, exists := os.LookupEnv("JAEGER_URL")
 
-	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
+	if !exists {
+		return nil, fmt.Errorf("JAEGER_URL variable not set")
+	}
+
+	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(jaegerUrl)))
 	if err != nil {
 		return nil, err
 	}
