@@ -41,7 +41,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.log.Print(err)
-		c.JSON(http.StatusBadRequest, util.HandleValidationError(err))
+		c.JSON(http.StatusUnprocessableEntity, util.HandleValidationError(err))
 		return
 	}
 

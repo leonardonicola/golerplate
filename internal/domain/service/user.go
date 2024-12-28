@@ -102,7 +102,7 @@ func (s *userService) Authenticate(ctx context.Context, email, password string) 
 	user, err := s.repo.GetByEmail(ctx, email)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New(constants.ErrMsgInvalidCredentials)
 	}
 
 	if !util.CheckPasswordEquality(password, user.Password) {
